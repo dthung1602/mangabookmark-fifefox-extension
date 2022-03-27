@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "MangaBookmark",
+  "version": "0.1",
+
+  "description": "Extension accompany the web app MangaBookmark",
+
+  "content_scripts": [
+    {
+      "matches": [
+        "*://manga4life.com/read-online/*",
+        "*://fanfox.net/manga/*",
+        "*://mangadex.org/chapter/*"
+      ],
+      "js": ["auto-mark-chapter.js"]
+    }
+  ],
+
+  "permissions": [
+    "https://mangabookmark.herokuapp.com/*",
+    "http://localhost/*"
+  ]
+}
