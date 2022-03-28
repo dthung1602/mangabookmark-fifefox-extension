@@ -8,9 +8,12 @@
   "content_scripts": [
     {
       "matches": [
+        "*://blogtruyen.vn/c*",
+        "*://truyentranhhay.top/*/*/*",
+        "*://fanfox.net/manga/*.html",
         "*://manga4life.com/read-online/*",
-        "*://fanfox.net/manga/*",
-        "*://mangadex.org/chapter/*"
+        "*://mangadex.org/chapter/*",
+        "*://mangahasu.se/*/chapter*c*.html"
       ],
       "js": ["auto-mark-chapter.js"]
     }
