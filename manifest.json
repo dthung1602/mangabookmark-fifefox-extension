@@ -13,7 +13,16 @@
         "*://fanfox.net/manga/*.html",
         "*://manga4life.com/read-online/*",
         "*://mangadex.org/chapter/*",
-        "*://mangahasu.se/*/chapter*c*.html"
+        "*://mangahasu.se/*/chapter*c*.html",
+        "*://chap.mangairo.com/story-*",
+        "*://mangakakalot.com/chapter/*",
+        "*://ww2.mangakakalots.com/chapter/*",
+        "*://readmanganato.com/manga-*",
+        "*://www.mangaread.org/manga/*/*",
+        "*://otakusan.net/chapter/*",
+        "*://www.readm.org/manga/*/*/all-pages",
+        "*://thichtruyentranh.com/*/*/*.html*",
+        "*://truyenqqpro.com/truyen-tranh/*.html"
       ],
       "js": ["auto-mark-chapter.js"]
     }
