@@ -1,4 +1,10 @@
-const BASE_URL = "http://localhost:3000";
+const ENV = "production";
+const ENV_BASE_URL_MAPPING = {
+  dev: "http://localhost:3000",
+  staging: "https://dev-manga-bookmark.herokuapp.com",
+  production: "https://mangabookmark.herokuapp.com"
+}
+const BASE_URL = ENV_BASE_URL_MAPPING[ENV];
 const WAITING_TIME_IN_SECS = 1;
 
 async function main() {
@@ -15,7 +21,7 @@ async function main() {
 }
 
 async function markChapter(mangaId) {
-    console.log("Auto marking chapter as read");
+    console.log("Start auto marking chapter as read");
 
     const body = {
       "isRead": true,
@@ -35,7 +41,9 @@ async function markChapter(mangaId) {
       body: JSON.stringify(body),
     });
 
-    console.log(await response.json());
+    await response.json();
+
+    console.log("Marked successfully")
 }
 
 async function getManga() {
