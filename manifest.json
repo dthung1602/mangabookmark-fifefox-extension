@@ -30,6 +30,7 @@
 
   "permissions": [
     "https://mangabookmark.herokuapp.com/*",
+    "https://dev-manga-bookmark.herokuapp.com/*",
     "http://localhost/*"
   ]
 }
