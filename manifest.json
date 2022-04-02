@@ -24,7 +24,8 @@
         "*://thichtruyentranh.com/*/*/*.html*",
         "*://truyenqqpro.com/truyen-tranh/*.html"
       ],
-      "js": ["auto-mark-chapter.js"]
+      "js": ["auto-mark-chapter.js"],
+      "run_at": "document_start"
     }
   ],
 

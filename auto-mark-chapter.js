@@ -1,62 +1,77 @@
-const ENV = "production";
+const ENV = "staging";
 const ENV_BASE_URL_MAPPING = {
   dev: "http://localhost:3000",
   staging: "https://dev-manga-bookmark.herokuapp.com",
   production: "https://mangabookmark.herokuapp.com"
 }
 const BASE_URL = ENV_BASE_URL_MAPPING[ENV];
-const WAITING_TIME_IN_SECS = 1;
+const WAIT_TIME_BEFORE_MARKING_CHAPTER_IN_SEC = 1;
+const POLL_LOCATION_WAIT_TIME_IN_SEC = 10;
+const VERBOSE = ENV !== "production";
 
-async function main() {
-  try {
-    const manga = await getManga();
-    if (isChapterRead(manga)) {
-      console.log(`Chapter already marked as read`);
-      return;
-    }
-    await markChapter(manga._id);
-  } catch (e) {
-    console.error(e);
+/**
+ * Marking chapter logic
+ */
+
+async function markChapter(mangaId, chapterLink) {
+  console.log("Start auto marking chapter as read");
+
+  const body = {
+    "isRead": true,
+    "chapters": [
+      chapterLink,
+    ]
+  };
+
+  const response = await fetch(`${BASE_URL}/api/mangas/${mangaId}/mark-chapters`, {
+    mode: "cors",
+    credentials: "include",
+    cache: "no-cache",
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (VERBOSE) {
+    console.log("Response:");
+    console.log(response);
   }
+
+  const responseBody = await response.json();
+
+  if (VERBOSE) {
+    console.log("Response body:");
+    console.log(responseBody);
+  }
+
+  console.log("Marked successfully")
 }
 
-async function markChapter(mangaId) {
-    console.log("Start auto marking chapter as read");
+async function getManga(chapterLink) {
+  // TODO add cache to avoid making API call
+  console.log(`Finding manga id of ${chapterLink}`);
 
-    const body = {
-      "isRead": true,
-      "chapters": [
-        window.location.toString(),
-      ]
-    };
-
-    const response = await fetch(`${BASE_URL}/api/mangas/${mangaId}/mark-chapters`, {
-      mode: "cors",
-      credentials: "include",
-      cache: "no-cache",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    await response.json();
-
-    console.log("Marked successfully")
-}
-
-async function getManga() {
-  console.log(`Finding manga id of ${window.location}`);
-
-  const params = new URLSearchParams({"chapters.link": window.location.toString()});
+  const params = new URLSearchParams({ "chapters.link": chapterLink });
   const url = `${BASE_URL}/api/mangas?${params}`;
 
   const response = await fetch(url);
+
+  if (VERBOSE) {
+    console.log("Response:");
+    console.log(response);
+  }
+
   const body = await response.json();
 
+  if (VERBOSE) {
+    console.log("Response body:");
+    console.log(body);
+  }
+
   if (body.data.length === 0) {
-    throw Error(`Cannot find manga with chapter ${window.location}`)
+    throw Error(`Cannot find manga with chapter ${chapterLink}`)
   }
 
   const manga = body.data[0];
@@ -65,11 +80,48 @@ async function getManga() {
   return manga;
 }
 
-function isChapterRead(manga) {
-  const link = window.location.toString();
-  return manga.chapters.find(ch => ch.link === link).isRead
+function isChapterRead(manga, chapterLink) {
+  return manga.chapters.find(ch => ch.link === chapterLink).isRead
 }
 
-setTimeout(main, WAITING_TIME_IN_SECS * 1000);
+/**
+ * Scheduling mark chapter logic
+ */
 
-// TODO handle SPA navigation
+function main(chapterLink) {
+  setTimeout(async function () {
+    // TODO ? Skip marking because user doesn't stay on page long enough ?
+    try {
+      const manga = await getManga(chapterLink);
+      if (isChapterRead(manga, chapterLink)) {
+        console.log(`Chapter already marked as read`);
+        return;
+      }
+      await markChapter(manga._id, chapterLink);
+    } catch (e) {
+      console.error(e);
+    }
+  }, WAIT_TIME_BEFORE_MARKING_CHAPTER_IN_SEC * 1000);
+}
+
+// For first page load & traditional pages
+main(window.location.href.toString());
+
+// For SPA navigation
+let lastLocation = window.location.href.toString();
+
+function checkIfUserNavigated() {
+  if (VERBOSE) {
+    console.log("Check if user navigated");
+  }
+  const currentLocation = window.location.href.toString();
+  if (lastLocation !== currentLocation) {
+    if (VERBOSE) {
+      console.log("User navigated");
+    }
+    main(currentLocation);
+    lastLocation = currentLocation;
+  }
+}
+
+setInterval(checkIfUserNavigated, POLL_LOCATION_WAIT_TIME_IN_SEC * 1000);
